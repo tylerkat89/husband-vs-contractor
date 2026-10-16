@@ -73,3 +73,10 @@ Conservative by design. Gas work, structural fixes, and permitted installs (like
 - **Creativity:** asymmetric marriage comedy plus a bluff mechanic.
 - **Usefulness:** real homeowner lessons about when to DIY and when to call a pro.
 - **Polish:** recap cards, sound, mobile layout.
+
+## Update (Oct 16): step-by-step decision chains
+After playtesting, the single "pick a plan" choice was replaced. Each job is now a **chain of 3–6 chronological steps**, each with 3–4 shuffled options: one correct next step, plus wrong-order or wrong moves, and sometimes "call a pro now."
+- A wrong pick adds a cost and a marriage/safety penalty, shows a short feedback line, and the player tries again. A **dangerous** pick (forcing a gas fitting, touching live wires, installing a bigger breaker) ends the job: the contractor fixes the fix at 1.3× the quote.
+- Some chains end correctly with **calling a pro after diagnosis** (patio BBQ gas line, AC condenser that keeps tripping its breaker). Good diagnosis takes a credit off the bill (the saved diagnostic fee). Gas connections are always a licensed-pro step. Resetting a breaker once is fine, and repeated trips mean call a pro.
+- Added a 9th scenario, **"The AC Won't Cool":** thermostat → condenser silent → tripped breaker → reset once → trips again → call an HVAC tech.
+- The recap shows the correct order next to the player's wrong picks.

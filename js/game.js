@@ -28,7 +28,7 @@ function title(){S=null;view(`<div class="card" style="text-align:center">
  on("#start",()=>{newGame($("#wn").value.trim(),$("#hn").value.trim());nextRound()});on("#how",howTo)}
 function howTo(){view(`<div class="card"><h2>How to play</h2>
  <p><b>👩 Wife:</b> pick a project, set the budget and the "Call the Pro" timer, then send him a note. You see one secret clue, and you can share it, hint at it, keep quiet, or <i>bluff</i>.</p>
- <p><b>👨 Husband:</b> inspect up to ${MAX_INSPECT} spots before the timer runs out, then choose: <b>DIY it</b>, <b>DIY plus a pro for the risky part</b>, or <b>call the pro</b>. Every job hides a surprise.</p>
+ <p><b>👨 Husband:</b> inspect up to ${MAX_INSPECT} spots before the timer runs out, then call the pro or take your ONE shot: work the job step by step, in the right order. Some jobs end with "call a pro" after you figure out the problem, and good diagnosis cuts the bill. Every job hides a surprise.</p>
  <p><b>🧾 The score:</b> the contractor's bill keeps running. Spend less than it, stay safe, and keep the 💞 Marriage Meter up. Unsafe DIY never counts as a win, even when it "works."</p>
  <button class="btn full" id="back">Got it</button></div>`);on("#back",title)}
 
@@ -75,50 +75,67 @@ function hubInspect(){const c=S.cur;c.left=c.timer;c.timedOut=false;
 function startClock(){stopTimer();const c=S.cur;timerId=setInterval(()=>{c.left--;const el=$("#clock");if(el){el.textContent="⏱️ "+c.left+"s";el.classList.toggle("low",c.left<=10)}
  if(c.left<=10&&c.left>0)beep("tick");if(c.left<=0){stopTimer();c.timedOut=true;resolve("pro")}},1000)}
 function hubDecide(){const c=S.cur;const keep=c.left;
- view(`<div class="card role-hub"><div class="timer" id="clock">⏱️ ${keep}s</div><h2>${c.sc.em} Your ONE shot. What's the move?</h2>
+ view(`<div class="card role-hub"><div class="timer" id="clock">⏱️ ${keep}s</div><h2>${c.sc.em} Your ONE shot. Ready?</h2>
+ <p>DIY means you work the job step by step. Wrong moves cost money, time, and marriage points, and a dangerous one ends the job.</p>
  <div class="opts">
-  <button class="btn" data-a="diy">🔧 DIY it myself (cost about ${money(c.sc.diyCost)})</button>
-  <button class="btn" data-a="split">🤝 DIY my part, pay a pro for the risky part</button>
+  <button class="btn" data-a="diy">🔧 Take a shot at it myself</button>
   <button class="btn" data-a="pro">📞 Call the pro now (${money(c.sc.quote)})</button>
  </div></div>`);c.left=keep;startClock();
- on(".opts button",el=>{const a=el.dataset.a;if(a==="diy")hubPlan();else resolve(a)})}
-function hubPlan(){const c=S.cur;const keep=c.left;
- view(`<div class="card role-hub"><div class="timer" id="clock">⏱️ ${keep}s</div><h2>🔧 Pick your game plan</h2>
- <div class="opts">${c.sc.plans.map((p,i)=>`<button class="btn" data-p="${i}">${i+1}. ${esc(p)}</button>`).join("")}</div>
- <button class="btn ghost" id="back">← Rethink</button></div>`);c.left=keep;startClock();
- on("[data-p]",el=>resolve("diy",+el.dataset.p));on("#back",hubDecide)}
+ on("[data-a=diy]",()=>{stopTimer();c.step=0;c.acc=0;c.mar=0;c.saf=0;c.mistakes=0;c.picks=c.sc.steps.map(()=>[]);c.removed=c.sc.steps.map(()=>[]);c.fb=null;chain()});
+ on("[data-a=pro]",()=>resolve("pro"))}
+function stepOptions(i){const c=S.cur,st=c.sc.steps[i];if(!c.opts)c.opts={};
+ if(!c.opts[i]){const o=[{t:st.ok[0],k:"ok"}].concat(st.bad.map((b,j)=>({t:b[0],k:"bad",j})));if(!st.noBail&&!st.proEnd)o.push({t:"📞 Call a pro now",k:"bail"});c.opts[i]=shuffle(o)}
+ return c.opts[i].filter((o,n)=>!c.removed[i].includes(n)).map(o=>({...o,n:c.opts[i].indexOf(o)}))}
+function chain(){const c=S.cur,sc=c.sc,st=sc.steps[c.step];
+ const dots=sc.steps.map((_,i)=>i<c.step?"🟢":i===c.step?"🔵":"⚪").join(" ");
+ view(`<div class="card role-hub"><p style="text-align:center">${dots}<br><small>Step ${c.step+1} of ${sc.steps.length} · spent so far ${money(c.acc)}</small></p>
+ <h2>${sc.em} ${esc(st.q)}</h2>
+ ${c.fb?`<p class="note ${c.fb.ok?"":"shake"}">${c.fb.ok?"✅":"❌"} ${esc(c.fb.t)}</p>`:""}
+ <div class="opts">${stepOptions(c.step).map(o=>`<button class="btn" data-n="${o.n}">${esc(o.t)}</button>`).join("")}</div></div>`);
+ on("[data-n]",el=>pickStep(+el.dataset.n))}
+function pickStep(n){const c=S.cur,sc=c.sc,st=sc.steps[c.step],o=c.opts[c.step][n];
+ c.picks[c.step].push({t:o.t,k:o.k});
+ if(o.k==="bail")return resolve("bail");
+ if(o.k==="ok"){c.acc+=st.ok[1]||0;c.saf+=2;
+  if(st.proEnd)return resolve("proEnd");
+  c.step++;c.fb={ok:true,t:st.ok[2]==="pro part"?`Good call. Pro handles that part (${money(st.ok[1])}).`:"Nice. On to the next step."};
+  if(c.step>=sc.steps.length)return resolve("done");beep("good");return chain()}
+ const b=st.bad[o.j];c.acc+=b[1];c.mar+=b[2];c.saf+=b[3];c.mistakes++;beep("bad");
+ if(b[5]){c.fatalFb=b[4];return resolve("fatal")}
+ c.removed[c.step].push(n);c.fb={ok:false,t:b[4]+(b[1]?` (−${money(b[1])})`:"")};chain()}
 
-function resolve(choice,plan){stopTimer();const c=S.cur,sc=c.sc;let spent,safety,mar,kind,text;
- const best=sc.best;
- if(choice==="pro"){spent=sc.quote;
-  if(best==="pro"){safety=20;mar=10;kind="good";text=sc.good}
-  else{safety=5;mar=-5;kind="meh";text=`The pro shows up, finds the issue, fixes it right, and charges full price. Safe, but he could've DIY'd this one.`}
-  if(c.timedOut){mar-=5;text="⏰ Time's up! She called the pro herself. "+text}}
- else if(choice==="split"){
-  if(best==="split"){spent=sc.diyCost+sc.splitPro;safety=15;mar=10;kind="good";text=sc.good}
-  else if(best==="pro"){spent=Math.round(sc.diyCost*.5)+sc.quote;safety=10;mar=0;kind="meh";text="You start, realize it's over your head, and call the pro anyway. Safe call, but you paid for the parts AND the pro."}
-  else{spent=sc.diyCost+sc.splitPro;safety=10;mar=-3;kind="meh";text="The pro does a small part you could've done yourself. Safe, just pricier than needed."}}
- else{ // diy
-  if(best==="diy"&&plan===sc.goodPlan){spent=sc.diyCost;safety=10;mar=15;kind="good";text=sc.good}
-  else{const danger=best!=="diy";spent=sc.diyCost+Math.round(sc.quote*(danger?1.4:0.6));safety=danger?-30:-10;mar=danger?-20:-10;kind="bad";
-   text=sc.fail+" Then the contractor comes out anyway, and charges extra to fix the fix.";if(danger)S.unsafe++}}
- const over=spent>c.budget&&choice!=="pro";if(over)mar-=8;
+function resolve(choice){stopTimer();const c=S.cur,sc=c.sc;let spent,safety,mar,kind,text;
+ const done=c.step||0,acc=c.acc||0;mar=c.mar||0;safety=c.saf||0;
+ if(choice==="pro"){spent=sc.quote;safety+=5;mar-=5;kind="meh";
+  text=c.timedOut?"⏰ Time's up! She called the pro herself. They fix it right, but you pay full price and never learn what was wrong.":"You call the pro right away. Safe, but you pay full price, including their diagnostic fee.";
+  if(c.timedOut)mar-=5}
+ else if(choice==="bail"){const cr=Math.round((sc.credit||0)*done/sc.steps.length);spent=acc+sc.quote-cr;safety+=5;mar-=3;kind="meh";
+  text=`You stopped partway and called a pro. Safe, but you paid for your attempt AND the full job${cr?` (minus ${money(cr)} for the diagnosis you'd already done)`:""}.`}
+ else if(choice==="proEnd"){const cr=sc.credit||0;spent=acc+sc.quote-cr;safety+=15;mar+=10;kind=c.mistakes?"meh":"good";
+  text=sc.good+(cr?` Your diagnosis knocked ${money(cr)} off the bill.`:"")}
+ else if(choice==="done"){spent=acc;safety+=10;mar+=10;kind=c.mistakes>1?"meh":"good";text=sc.good+(c.mistakes?` (${c.mistakes} wrong move${c.mistakes>1?"s":""} along the way cost you.)`:"")}
+ else{spent=acc+Math.round(sc.quote*1.3);kind="bad";S.unsafe++;mar-=10;
+  text=c.fatalFb+" Job over. The contractor comes out anyway, and charges extra to fix the fix."}
+ const over=spent>c.budget&&choice!=="pro"&&choice!=="proEnd";if(over)mar-=8;
  const realSeen=c.opened.some(i=>sc.spots[i].t==="real");if(realSeen)safety+=5;
- const bluffWin=c.msg==="bluff"&&kind==="bad";if(c.msg==="share"&&kind==="good")mar+=5;
+ const bluffWin=c.msg==="bluff"&&(kind==="bad"||c.mistakes>=2);if(c.msg==="share"&&kind==="good")mar+=5;
  S.bill+=sc.quote;S.spent+=spent;S.safety+=safety;S.marriage=Math.max(0,Math.min(100,S.marriage+mar));
  S.log.push({t:sc.title,em:sc.em,quote:sc.quote,spent,kind});
  beep(kind==="bad"?"bad":"good");
+ const seq=sc.steps.map((st,i)=>{const p=(c.picks||[])[i]||[];const wrong=p.filter(x=>x.k!=="ok");const got=p.some(x=>x.k==="ok");
+  return `<li><b>${got?"✅":p.length?"❌":"⏭️"} ${esc(st.ok[0])}</b>${wrong.map(w=>`<br><small style="color:var(--bad)">You picked: ${esc(w.t)}</small>`).join("")}</li>`}).join("");
  view(`<div class="card result-${kind} ${kind==="bad"?"shake":""}">
  <div class="cut">${sc.em} ${kind==="good"?"✨🏆":kind==="bad"?"💥😱":"🧾😐"}</div>
- <h2>${kind==="good"?"Nailed it!":kind==="bad"?"Oh no.":"Safe... but pricey."}</h2>
+ <h2>${kind==="good"?"Nailed it!":kind==="bad"?"Oh no.":"Got there... the expensive way."}</h2>
  <p><b>The hidden issue:</b> ${esc(sc.hidden)}</p><p>${esc(text)}</p>
  ${bluffWin?`<p class="note">😈 ${esc(S.wife)}'s bluff worked. She'll never let you forget this.</p>`:""}
  <div class="row"><span>🧾 Contractor quote</span><b>${money(sc.quote)}</b></div>
  <div class="row"><span>🔧 You actually spent</span><b>${money(spent)}</b></div>
  <div class="row"><span>💰 Saved vs contractor</span><b style="color:${sc.quote-spent>=0?"var(--good)":"var(--bad)"}">${money(sc.quote-spent)}</b></div>
- <div class="row"><span>🦺 Safety</span><b>${safety>=0?"+":""}${safety}${realSeen?" (incl. +5 for finding a real clue)":""}</b></div>
+ <div class="row"><span>🦺 Safety</span><b>${safety>=0?"+":""}${safety}</b></div>
  <div class="row"><span>💞 Marriage</span><b>${mar>=0?"+":""}${mar}${over?" (over budget!)":""}</b></div>
- <div class="lesson">🎓 <b>Real-world takeaway:</b> ${esc(sc.lesson)} <br><small>Best move: <b>${{diy:"DIY it, done right",split:"DIY your part and hire a pro for the risky part",pro:"Call a licensed pro"}[best]}</b></small></div>
+ <div class="lesson">🛠️ <b>The right order:</b><ol style="margin:6px 0 0;padding-left:20px">${seq}</ol></div>
+ <div class="lesson">🎓 <b>Real-world takeaway:</b> ${esc(sc.lesson)}</div>
  <p></p><button class="btn full" id="next">${S.round>=ROUNDS?"See final results 🏁":"Next project ▶"}</button></div>`);
  on("#next",nextRound)}
 
