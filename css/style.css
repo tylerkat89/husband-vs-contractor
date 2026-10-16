@@ -1,0 +1,50 @@
+:root{--bg:#fff7ec;--ink:#2b2118;--card:#fff;--wife:#e05a8a;--hub:#2f7dd1;--pro:#f2a516;--good:#2e9d5b;--bad:#d64040;--muted:#7a6b5c}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg) repeating-linear-gradient(45deg,transparent 0 22px,#00000005 22px 44px);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+main{flex:1;width:100%;max-width:760px;margin:0 auto;padding:16px}
+footer{font-size:12px;color:var(--muted);text-align:center;padding:10px 16px 16px}
+.hidden{display:none!important}
+#hud{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:8px;background:#2b2118;color:#fff;position:sticky;top:0;z-index:5}
+.stat{background:#ffffff14;border-radius:10px;padding:4px 10px;display:flex;flex-direction:column;align-items:center;min-width:90px}
+.stat span{font-size:11px;opacity:.75}.stat b{font-size:16px}
+.bar{width:90px;height:10px;background:#ffffff30;border-radius:6px;overflow:hidden;margin-top:4px}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--bad),var(--pro),var(--good));transition:width .6s}
+.card{background:var(--card);border-radius:18px;padding:20px;box-shadow:0 6px 0 #0001,0 10px 30px #0001;margin:12px 0;animation:pop .35s ease}
+@keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+h1{font-size:clamp(28px,7vw,48px);margin:.2em 0;line-height:1.05}
+h2{margin:.2em 0 .4em}
+.vs{color:var(--pro)}
+.big{font-size:64px;text-align:center;margin:6px 0}
+p.lead{font-size:18px}
+.btn{display:inline-block;border:0;border-radius:14px;padding:14px 18px;font-size:17px;font-weight:700;cursor:pointer;background:var(--ink);color:#fff;margin:6px 6px 6px 0;box-shadow:0 4px 0 #0003;transition:transform .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 #0003}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.wife{background:var(--wife)}.btn.hub{background:var(--hub)}.btn.pro{background:var(--pro);color:#2b2118}.btn.good{background:var(--good)}.btn.ghost{background:#fff;color:var(--ink);border:2px solid var(--ink)}
+.full{width:100%;margin-right:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.pick{border:3px solid transparent;cursor:pointer;text-align:left;font:inherit;background:#fff;border-radius:16px;padding:14px;box-shadow:0 4px 0 #0001}
+.pick:hover,.pick.sel{border-color:var(--wife)}
+.pick .em{font-size:40px}
+.tag{display:inline-block;font-size:12px;font-weight:700;padding:3px 8px;border-radius:20px;background:#0000000d;margin:2px 4px 2px 0}
+.role-wife{border-top:8px solid var(--wife)}.role-hub{border-top:8px solid var(--hub)}.role-pro{border-top:8px solid var(--pro)}
+label{display:block;font-weight:700;margin:12px 0 4px}
+input[type=range]{width:100%}
+.opts button{display:block;width:100%;text-align:left;margin:6px 0;background:#f4ede4;color:var(--ink);box-shadow:none;border:2px solid transparent}
+.opts button.sel{border-color:var(--ink);background:#fff}
+.secret{background:#fff0f6;border:2px dashed var(--wife);border-radius:12px;padding:12px;margin:10px 0}
+.note{background:#fffbe0;border-left:6px solid var(--pro);padding:12px;border-radius:8px;font-style:italic;margin:10px 0}
+.hot{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.spot{font:inherit;background:#f4ede4;border:2px solid #0001;border-radius:14px;padding:12px;cursor:pointer;text-align:left;min-height:70px}
+.spot.open{background:#fff;border-color:var(--hub);cursor:default}
+.spot small{display:block;color:var(--muted);margin-top:6px;font-size:14px}
+.timer{font-size:28px;font-weight:800;text-align:center}
+.timer.low{color:var(--bad);animation:pulse .6s infinite alternate}
+@keyframes pulse{to{transform:scale(1.12)}}
+.result-good{border-top:8px solid var(--good)}.result-bad{border-top:8px solid var(--bad)}.result-meh{border-top:8px solid var(--pro)}
+.row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #0002}
+.lesson{background:#e9f7ef;border-radius:12px;padding:12px;margin-top:12px}
+.shake{animation:shake .5s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.pass{text-align:center;padding:40px 20px}
+.cut{font-size:48px;text-align:center;letter-spacing:6px}
+input[type=text]{font-size:17px;padding:10px;border-radius:10px;border:2px solid #0002;width:100%}
