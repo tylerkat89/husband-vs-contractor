@@ -1,6 +1,8 @@
 #Project for Handshake Deployment
 # Husband vs Contractor 🔧
 
+**Project creator and maintainer: [Tyler Katayama](https://github.com/tylerkat89) · [Attribution](ATTRIBUTION.md)**
+
 A 2-player, pass-the-device browser game. She finds the house projects. The contractor names the price. **He gets ONE shot to DIY it cheaper**, without wrecking the house or the marriage.
 
 Every "simple" job hides an everyday homeowner surprise: a leak behind the drywall, a grill that needs a natural gas line, a rotted water heater platform, a ceiling box that isn't rated for a fan, and more. The game teaches when to DIY and when to call a pro.
