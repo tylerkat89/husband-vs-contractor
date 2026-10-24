@@ -1,4 +1,3 @@
-#Project for Handshake Deployment
 # Husband vs Contractor 🔧
 
 **Project creator and maintainer: [Tyler Katayama](https://github.com/tylerkat89) · [Attribution](ATTRIBUTION.md)**
@@ -8,6 +7,18 @@ A 2-player, pass-the-device browser game. She finds the house projects. The cont
 Every "simple" job hides an everyday homeowner surprise: a leak behind the drywall, a grill that needs a natural gas line, a rotted water heater platform, a ceiling box that isn't rated for a fan, and more. The game teaches when to DIY and when to call a pro.
 
 ▶ **Play:** https://tylerkat89.github.io/husband-vs-contractor/
+
+## Origin / Why I built this
+**Handshake challenges / studio — Handshake AI Skills Studio, “Create a Multiplayer Game,” October 2026.**
+
+I built this challenge prototype around a problem I know from facilities and HVAC: the first visible symptom isn't always the real job. The jokes make it a game; inspecting clues and knowing when to call a pro give it a point. Challenge participation is not a claim of sponsorship or endorsement.
+
+## Status and project guide
+**Playable browser prototype.** Two people share one device; this is local pass-the-device play. The design document also contains plans, which should not be read as shipped features.
+
+[Play](https://tylerkat89.github.io/husband-vs-contractor/) · [Design notes](DESIGN.md) · [Scenarios](js/scenarios.js) · [Portfolio](https://github.com/tylerkat89)
+
+For a local look, serve this directory with a static HTTP server and open `index.html`. There is no package-install step or backend.
 
 ## How to play
 1. **Wife:** pick a project, set the DIY budget and the "Call the Pro" timer, then leave a note. You see one secret clue, and you can share it, hint at it, keep quiet, or bluff.
